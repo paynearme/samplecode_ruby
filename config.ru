@@ -1,6 +1,8 @@
 # Run this directly with rackup
 
-require 'paynearme_callbacks'
+require 'paynearme/callbacks/api'
 
 use Rack::Reloader
-run PayNearMe::Callbacks::API
+use Rack::CommonLogger
+
+run Paynearme::Callbacks::API

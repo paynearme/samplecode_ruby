@@ -1,5 +1,5 @@
 module Paynearme
-	module Callbacks
-  		VERSION = "0.5.0"
-	end
+  module Callbacks
+    VERSION = "1.0.0"
+  end
 end
