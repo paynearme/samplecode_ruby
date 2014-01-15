@@ -1,6 +1,7 @@
 # Install PayNearMe::Callbacks::API to a rails application
 
 require 'rails/generators'
+
 module Paynearme
   module Generators
 
@@ -13,6 +14,7 @@ module Paynearme
 Rails.application.config.paths.add "app/api", glob: "**/*.rb"
 Rails.application.config.autoload_paths += Dir["\#{Rails.root}/app/api/*"]
 
+# Configure your API settings here
 Rails.application.config.paynearme_secret = "d33af5664496dc4d"
 Rails.application.config.paynearme_site_identifier = "CALLBACK_RUBY"
         FILE
