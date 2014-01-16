@@ -27,6 +27,12 @@ Rails.application.config.paynearme_site_identifier = "CALLBACK_RUBY"
       def create_routes
         route "mount Paynearme::Callbacks::API => '/callbacks'"
       end
+
+      def add_gems
+        gem 'grape', '~> 0.6'
+        gem 'nokogiri', '~> 1.5'
+      end
+
     end
   end
 end
