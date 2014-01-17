@@ -19,7 +19,11 @@ module Paynearme
       #end
 
       def logger
-        API.logger
+        if defined? Rails
+          Rails.logger
+        else
+          API.logger
+        end
       end
 
       def secret_key
@@ -61,7 +65,7 @@ module Paynearme
       end
 
       ## Test hackery - returns a response - if nil, handle normally
-      def handle_special_condition
+      def handle_special_condition!
         arg = params[:site_order_annotation]
         if arg.nil?
           return nil
@@ -80,6 +84,16 @@ module Paynearme
         end
         logger.info 'Reached end of #handle_special_condition, returning nil - handle rest of response as usual.'
         nil
+      end
+
+      # XML Schema and namespaces
+      def xml_headers
+        schema = "pnm_xmlschema_v#{params[:version].gsub('.', '_')}"
+        {
+            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+            'xsi:schemaLocation' => "http://www.paynearme.com/api/#{schema} #{schema}.xsd",
+            'xmlns:t' => "http://www.paynearme.com/api/#{schema}"
+        }
       end
 
     end
