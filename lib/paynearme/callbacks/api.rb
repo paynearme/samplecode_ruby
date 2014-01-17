@@ -1,114 +1,106 @@
 require 'grape'
 require 'nokogiri'
 
+require 'paynearme/callbacks/helpers'
+require 'paynearme/callbacks/version'
+
 module Paynearme
   module Callbacks
-        class API < Grape::API
-          format :xml
-          # version '2.0', using: :param, parameter: 'version'
+    class API < Grape::API
+      format :xml
+      helpers Helpers
 
-          helpers do
-            def logger
-              API.logger
-            end
+      def initialize
+        super
+        API.logger.info "Paynearme::Callbacks::API version #{Paynearme::Callbacks::VERSION}"
+      end
 
-            def secret_key
-              if defined? Rails
-                Rails.application.config.paynearme_secret
-              else
-                'd33af5664496dc4d'
-              end
-            end
+      before do
+        @start_time = Time.now
+      end
 
-            def site_identifier
-              if defined? Rails
-                Rails.application.config.paynearme_site_identifier
-              else
-                'CALLBACKS_RUBY_SITE_ID'
-              end
-            end
+      after do
+        logger.info "Request handled in #{(Time.now - @start_time)*1000.0}ms"
+      end
 
-            def signature (secret, params)
-              sig = params.keys.sort.select { |p|
-                p =~ /^pnm_.+|^site_.+|^due_to_site_.+|^(?:net_)?payment_.+|^version$|^timestamp$|^test$/ and !params[p].nil? and params[p] != ''
-              }.inject('') { |memo, cur| memo += "#{cur}#{params[cur]}" }
-              Digest::MD5.hexdigest(sig + secret)
-            end
+      ##########
+      # /authorize callback
+      #########################################################################
+      params do
+        # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
+        requires :pnm_order_identifier, type: String
+        requires :signature, type: String
+        requires :version, type: String
+        requires :timestamp, type: Integer
+        optional :site_order_identifier, type: String
+        optional :site_order_annotation, type: String
+        optional :test, type: Boolean
+        optional :status, type: String
+      end
+      get :authorize do
+        logger.info 'This request is a test! Do not handle tests as real financial events!' if test?
 
-            def valid_signature? (params)
-              sig = signature secret_key, params
-              provided = params[:signature]
-              logger.debug "Signature - provided: #{provided}, expected: #{sig}"
+        site_order_identifier = params[:site_order_identifier]
 
-              sig == provided
-            end
-
-          end
-
-          before do
-            @start_time = Time.now
-          end
-
-          after do
-            logger.info "Request handled in #{(Time.now - @start_time)*1000.0}ms"
-          end
-
-          ##########
-          # /authorize callback
-          #########################################################################
-          params do
-            requires :pnm_order_identifier, type: String
-            requires :signature, type: String
-            requires :version, type: String
-            requires :timestamp, type: Integer
-
-            optional :site_order_identifier, type: String
-            optional :test, type: Boolean
-          end
-          get :authorize do
-            site_order_identifier = params[:site_order_identifier]
-
-            accept = false
-            if valid_signature?(params) and site_order_identifier =~ /^TEST/
-              accept = true
-            end
-            logger.info "Order: #{site_order_identifier} will be #{accept ? 'accepted' : 'declined'}"
-
-            Nokogiri::XML::Builder.new do |xml|
-              t = xml[:t]
-              schema = "pnm_xmlschema_v#{params[:version].gsub('.', '_')}"
-              t.payment_authorization_response('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                                               'xsi:schemaLocation' => "http://www.paynearme.com/api/#{schema} #{schema}.xsd",
-                                               'xmlns:t' => "http://www.paynearme.com/api/#{schema}") do
-                t.authorization do
-                  t.pnm_order_identifier params[:pnm_order_identifier]
-                  t.accept_payment accept ? 'yes' : 'no'
-                end
-              end
-            end
-          end
-
-          ##########
-          # /confirm callback
-          #########################################################################
-          params do
-            requires :pnm_order_identifier, type: String
-          end
-          get :confirm do
-
-            Nokogiri::XML::Builder.new { |xml|
-              t = xml[:t]
-              schema = "pnm_xmlschema_v#{params[:version].gsub('.', '_')}"
-              t.payment_confirmation_response('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                                              'xsi:schemaLocation' => "http://www.paynearme.com/api/#{schema} #{schema}.xsd",
-                                              'xmlns:t' => "http://www.paynearme.com/api/#{schema}") {
-                t.confirmation {
-                  t.pnm_order_identifier params[:pnm_order_identifier]
-                }
-              }
-            } if valid_signature? params
-          end
+        accept = false
+        if valid_signature? and site_order_identifier =~ /^TEST/
+          accept = true
         end
+        logger.info "Order: #{site_order_identifier} will be #{accept ? 'accepted' : 'declined'}"
+
+        special = handle_special_condition
+        if special.nil?
+          Nokogiri::XML::Builder.new do |xml|
+            t = xml[:t]
+            schema = "pnm_xmlschema_v#{params[:version].gsub('.', '_')}"
+            t.payment_authorization_response('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                                             'xsi:schemaLocation' => "http://www.paynearme.com/api/#{schema} #{schema}.xsd",
+                                             'xmlns:t' => "http://www.paynearme.com/api/#{schema}") do
+              t.authorization do
+                t.pnm_order_identifier params[:pnm_order_identifier]
+                t.accept_payment accept ? 'yes' : 'no'
+              end
+            end
+          end
+        else
+          special
+        end
+      end
+
+      ##########
+      # /confirm callback
+      #########################################################################
+      params do
+        # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
+        requires :pnm_order_identifier, type: String
+        requires :signature, type: String
+        requires :version, type: String
+        requires :timestamp, type: Integer
+        optional :site_order_identifier, type: String
+        optional :site_order_annotation, type: String
+        optional :test, type: Boolean
+        optional :status, type: String
+      end
+      get :confirm do
+        logger.info 'This request is a test! Do not handle tests as real financial events!' if test?
+
+        if params[:status] and params[:status].downcase == 'decline'
+          logger.info "Transaction was declined - do not post, still respond to callback."
+        end
+
+        Nokogiri::XML::Builder.new { |xml|
+          t = xml[:t]
+          schema = "pnm_xmlschema_v#{params[:version].gsub('.', '_')}"
+          t.payment_confirmation_response('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                                          'xsi:schemaLocation' => "http://www.paynearme.com/api/#{schema} #{schema}.xsd",
+                                          'xmlns:t' => "http://www.paynearme.com/api/#{schema}") {
+            t.confirmation {
+              t.pnm_order_identifier params[:pnm_order_identifier]
+            }
+          }
+        } if valid_signature?
+      end
+    end
   end
 end
 

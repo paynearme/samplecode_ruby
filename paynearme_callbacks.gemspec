@@ -1,6 +1,7 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 require 'paynearme/callbacks/version'
 
 Gem::Specification.new do |spec|
@@ -8,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.version       = Paynearme::Callbacks::VERSION
   spec.authors       = ["PayNearMe", "Grio"]
   spec.email         = ["rschultz@grio.com"]
-  spec.description   = %q{Write a gem description}
-  spec.summary       = %q{Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{Callback api implementation for rails and rack applications.}
+  spec.summary       = %q{Need to write a summary}
+  spec.homepage      = "http://www.paynearme.com/"
   spec.license       = "Proprietary"
 
   spec.files         = `git ls-files`.split($/)
