@@ -53,7 +53,7 @@ module Paynearme
       def valid_signature?
         sig = signature secret_key, params
         provided = params[:signature]
-        logger.debug "Signature - provided: #{provided}, expected: #{sig}"
+        logger.debug "Signature - provided: #{provided}, expected: #{sig}, secret: '#{secret_key}'"
         valid = sig == provided
 
         logger.info "Signature is #{valid ? 'VALID' : 'INVALID'}"

@@ -27,7 +27,7 @@ Rails.application.config.paynearme_site_identifier = "CALLBACK_RUBY"
       def create_routes
         route "mount Paynearme::Callbacks::API => '/callbacks'"
       end
-      
+
     end
   end
 end
