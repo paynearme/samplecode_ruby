@@ -43,10 +43,10 @@ module Paynearme
       end
 
       def signature (secret, params)
-        keys = params.keys.sort.select do |p|
-          p =~ /^pnm_.+|^site_.+|^due_to_site_.+|^(?:net_)?payment_.+|^version$|^timestamp$|^status$|^test$|^account_number$/ and !params[p].nil? and params[p] != ''
-        end
-        sig = keys.inject('') { |memo, cur| memo += "#{cur}#{params[cur]}" }
+        rejections = ['signature', 'route_info'] # part of grape
+        keys = params.keys.sort.reject { |key| rejections.include? key }
+        sig = keys.inject('') { |memo, cur| "#{memo}#{cur}#{params[cur]}" }
+        logger.debug "Signature string: #{sig + secret}"
         Digest::MD5.hexdigest(sig + secret)
       end
 
