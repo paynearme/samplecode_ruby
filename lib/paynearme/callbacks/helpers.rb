@@ -44,7 +44,7 @@ module Paynearme
 
       def signature (secret, params)
         keys = params.keys.sort.select do |p|
-          p =~ /^pnm_.+|^site_.+|^due_to_site_.+|^(?:net_)?payment_.+|^version$|^timestamp$|^status$|^test$/ and !params[p].nil? and params[p] != ''
+          p =~ /^pnm_.+|^site_.+|^due_to_site_.+|^(?:net_)?payment_.+|^version$|^timestamp$|^status$|^test$|^account_number$/ and !params[p].nil? and params[p] != ''
         end
         sig = keys.inject('') { |memo, cur| memo += "#{cur}#{params[cur]}" }
         Digest::MD5.hexdigest(sig + secret)
