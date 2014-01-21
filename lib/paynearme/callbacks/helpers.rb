@@ -43,7 +43,7 @@ module Paynearme
       end
 
       def signature (secret, params)
-        rejections = ['signature', 'route_info'] # part of grape
+        rejections = %w(signature action call controller fp print_buttons route_info)
         keys = params.keys.sort.reject { |key| rejections.include? key }
         sig = keys.inject('') { |memo, cur| "#{memo}#{cur}#{params[cur]}" }
         logger.debug "Signature string: #{sig + secret}"
@@ -71,7 +71,7 @@ module Paynearme
           return nil
         elsif arg =~ /^confirm_delay_([0-9]+)/
           logger.info "Delaying response by #{$1} seconds"
-          sleep $1
+          sleep $1.to_i
         elsif arg == 'confirm_bad_xml'
           logger.info 'Responding with bad/broken xml'
           return '<result'
