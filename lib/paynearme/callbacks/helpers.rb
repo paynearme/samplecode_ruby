@@ -88,11 +88,13 @@ module Paynearme
 
       # XML Schema and namespaces
       def xml_headers
-        schema = "pnm_xmlschema_v#{params[:version].gsub('.', '_')}"
+        version = params[:version]
+        schema = "pnm_xmlschema_v#{version.gsub('.', '_')}"
         {
             'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:schemaLocation' => "http://www.paynearme.com/api/#{schema} #{schema}.xsd",
-            'xmlns:t' => "http://www.paynearme.com/api/#{schema}"
+            'xmlns:t' => "http://www.paynearme.com/api/#{schema}",
+            :version => version
         }
       end
 

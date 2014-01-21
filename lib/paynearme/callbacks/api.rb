@@ -52,7 +52,7 @@ module Paynearme
         end
         logger.info "Order: #{site_order_identifier} will be #{accept ? 'accepted' : 'declined'}"
 
-        special = handle_special_condition!
+        special = handle_special_condition! # if special is non-nil, we want to return our special response.
         if special.nil?
           Nokogiri::XML::Builder.new do |xml|
             t = xml[:t] # get our t: namespace prefix
@@ -102,15 +102,15 @@ module Paynearme
         pnm_order_identifier = params[:pnm_order_identifier]
 
 
-        special = handle_special_condition!
+        special = handle_special_condition! # if special is non-nil, we want to return our special response.
         if special.nil?
           Nokogiri::XML::Builder.new do |xml|
             t = xml[:t] # get our t: namespace prefix
-            t.payment_confirmation_response(xml_headers) {
-              t.confirmation {
+            t.payment_confirmation_response(xml_headers) do
+              t.confirmation do
                 t.pnm_order_identifier pnm_order_identifier
-              }
-            }
+              end
+            end
           end if valid_signature?
         else
           special
