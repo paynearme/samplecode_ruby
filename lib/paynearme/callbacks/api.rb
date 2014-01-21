@@ -28,7 +28,7 @@ module Paynearme
       #########################################################################
       params do
         # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
-        requires :pnm_order_identifier, type: String
+        optional :pnm_order_identifier, type: String
         requires :signature, type: String
         requires :version, type: String
         requires :timestamp, type: Integer
