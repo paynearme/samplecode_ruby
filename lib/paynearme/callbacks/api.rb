@@ -38,7 +38,7 @@ module Paynearme
         optional :status, type: String
       end
       get :authorize do
-        logger.info 'This /authorize request is a test! Do not handle tests as real financial events!' if test?
+        logger.warn 'This /authorize request is a test! Do not handle tests as real financial events!' if test?
 
         site_order_identifier = params[:site_order_identifier]
 
@@ -89,7 +89,7 @@ module Paynearme
         optional :status, type: String
       end
       get :confirm do
-        logger.info 'This /confirm request is a test! Do not handle tests as real financial events!' if test?
+        logger.warn 'This /confirm request is a test! Do not handle tests as real financial events!' if test?
 
         if params[:status] and params[:status].downcase == 'decline'
           logger.info "Transaction was declined - do not post, still respond to callback."
