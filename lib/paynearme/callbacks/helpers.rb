@@ -42,6 +42,18 @@ module Paynearme
         end
       end
 
+      def callback_version
+        if defined? Rails
+          Rails.application.config.paynearme_callback_version
+        else
+          '2.0'
+        end
+      end
+
+      def check_version?
+        callback_version == params[:version]
+      end
+
       def signature (secret, params)
         rejections = %w(signature action call controller fp print_buttons route_info)
         keys = params.keys.sort.reject { |key| rejections.include? key }
@@ -56,7 +68,7 @@ module Paynearme
         logger.debug "Signature - provided: #{provided}, expected: #{sig}, secret: '#{secret_key}'"
         valid = sig == provided
 
-        logger.info "Signature is #{valid ? 'VALID' : 'INVALID'}"
+        logger.send(valid ? 'info' : 'error', "Signature is #{valid ? 'VALID' : 'INVALID'}")
         valid
       end
 

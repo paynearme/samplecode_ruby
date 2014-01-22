@@ -17,6 +17,7 @@ Rails.application.config.autoload_paths += Dir["\#{Rails.root}/app/api/*"]
 # Configure your API settings here
 Rails.application.config.paynearme_secret = "d33af5664496dc4d"
 Rails.application.config.paynearme_site_identifier = "CALLBACK_RUBY"
+Rails.application.config.paynearme_callback_version = '2.0'
         FILE
       end
 

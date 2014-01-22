@@ -30,7 +30,7 @@ module Paynearme
         # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
         optional :pnm_order_identifier, type: String
         requires :signature, type: String
-        requires :version, type: String
+        requires :version, type: String, values: [callback_version]
         requires :timestamp, type: Integer
         optional :site_order_identifier, type: String
         optional :site_order_annotation, type: String
@@ -92,13 +92,15 @@ module Paynearme
         logger.warn 'This /confirm request is a test! Do not handle tests as real financial events!' if test?
 
         if params[:status] and params[:status].downcase == 'decline'
-          logger.info "Transaction was declined - do not post, still respond to callback."
+          logger.warn "Transaction #{params[:site_order_identifier]} was declined - do not post, still respond to callback."
         end
 
         # You must lookup the pnm_order_identifier in your business system and
         # prevent double posting. In the event of a duplicate, ignore the
-        # posting (do not reply). No stub code is provided for this check, and
-        # is left to the responsibility of the implementor.
+        # posting (do not reply) if you have already responded at least once
+        # for the pnm_order_identifier in question.
+        # No stub code is provided for this check, and is left to the
+        # responsibility of the implementor.
         pnm_order_identifier = params[:pnm_order_identifier]
 
 
