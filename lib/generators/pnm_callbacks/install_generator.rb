@@ -1,12 +1,13 @@
-# Install PayNearMe::Callbacks::API to a rails application
-
 require 'rails/generators'
 
-module Paynearme
+module PnmCallbacks
   module Generators
 
-    class InstallCallbacksGenerator < Rails::Generators::Base
-      source_root File.join(File.dirname(__FILE__), '..', '..', '..', '..')
+    class InstallGenerator < Rails::Generators::Base
+      class_option :routes, type: :boolean, default: true, desc: "Add routes to application"
+      class_option :route, type: :string, default: '/callbacks', desc: "Mount point for callbacks api"
+      desc "Install the PayNearMe callbacks API into your rails application"
+      source_root File.join(File.dirname(__FILE__), '..', '..')
 
       def create_grape_initializer
         create_file "config/initializers/paynearme_api.rb", <<-FILE
@@ -26,9 +27,11 @@ Rails.application.config.paynearme_callback_version = '2.0'
       end
 
       def create_routes
-        route "mount Paynearme::Callbacks::API => '/callbacks'"
+        route "mount Paynearme::Callbacks::API => '#{options.route}'" if options.routes?
       end
 
     end
+
   end
 end
+

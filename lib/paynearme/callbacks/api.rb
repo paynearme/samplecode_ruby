@@ -4,6 +4,8 @@ require 'nokogiri'
 require 'paynearme/callbacks/helpers'
 require 'paynearme/callbacks/version'
 
+require 'logger'
+
 module Paynearme
   module Callbacks
     class API < Grape::API
@@ -12,6 +14,7 @@ module Paynearme
 
       def initialize
         super
+        self.class.logger self.class.get_logger
         API.logger.info "Paynearme::Callbacks::API version #{Paynearme::Callbacks::VERSION}"
       end
 
@@ -30,7 +33,7 @@ module Paynearme
         # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
         optional :pnm_order_identifier, type: String
         requires :signature, type: String
-        requires :version, type: String, values: [callback_version]
+        requires :version, type: String
         requires :timestamp, type: Integer
         optional :site_order_identifier, type: String
         optional :site_order_annotation, type: String
@@ -122,6 +125,16 @@ module Paynearme
         # of this pnm_order_identifier and DO NOT respond to any other
         # /confirm requests for that pnm_order_identifier.
 
+      end
+
+      # helper to build our logger
+      def self.get_logger
+        if defined? Rails
+          #Logger.new File.open(File.join(Rails.root, 'log', "#{Rails.env}.log"))
+          ActiveSupport::TaggedLogging.new(Rails.logger).tagged(self.name)
+        else
+          Logger.new STDOUT
+        end
       end
     end
   end

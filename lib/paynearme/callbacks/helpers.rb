@@ -19,11 +19,7 @@ module Paynearme
       #end
 
       def logger
-        if defined? Rails
-          Rails.logger
-        else
-          API.logger
-        end
+        API.logger
       end
 
       def secret_key
@@ -111,6 +107,6 @@ module Paynearme
       end
 
     end
-
   end
 end
+
