@@ -4,7 +4,7 @@ require 'nokogiri'
 require 'paynearme/callbacks/helpers'
 require 'paynearme/callbacks/version'
 
-require 'logger'
+require 'paynearme/callbacks/logger'
 
 module Paynearme
   module Callbacks
@@ -12,9 +12,10 @@ module Paynearme
       format :xml
       helpers Helpers
 
+      logger Paynearme::Callbacks::Logger.new self.name
+
       def initialize
         super
-        self.class.logger self.class.get_logger
         API.logger.info "Paynearme::Callbacks::API version #{Paynearme::Callbacks::VERSION}"
       end
 
@@ -131,7 +132,7 @@ module Paynearme
       def self.get_logger
         if defined? Rails
           #Logger.new File.open(File.join(Rails.root, 'log', "#{Rails.env}.log"))
-          ActiveSupport::TaggedLogging.new(Rails.logger).tagged(self.name)
+          Rails.logger
         else
           Logger.new STDOUT
         end
