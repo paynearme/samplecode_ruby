@@ -12,7 +12,7 @@ module Paynearme
       format :xml
       helpers Helpers
 
-      logger Paynearme::Callbacks::Logger.new self.name
+      logger Paynearme::Callbacks::Logger.new(name: self.name)
 
       def initialize
         super
