@@ -24,7 +24,9 @@ module Paynearme
       end
 
       after do
-        logger.info "Request handled in #{(Time.now - @start_time)*1000.0}ms"
+        exec_time = (Time.now - @start_time)*1000.0
+        logger.info "Request handled in #{exec_time}ms"
+        logger.warn "Request took longer than 6 seconds!" if exec_time >= 6000
       end
 
       ##########
