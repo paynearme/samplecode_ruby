@@ -1,11 +1,13 @@
 # PaynearmeCallbacks
 
-PayNearMe Callbacks implementation for Ruby webservices and applications. 
-Usable with any ```Rack``` friendly application.
+This is a starting point for integrating your service with PayNearMe's callback
+system. Provided in this project is a framework for handling incoming callbacks
+from PayNearMe and constructing the appropriate response. Each callback method
+includes an example implementation.
 
 This package serves as a starting point for integrating paynearme callbacks
 into your existing ruby application stack. It is an example implementation
-and leaves implementation details up to the end user (you). 
+and leaves implementation details up to the end user (you).
 
 ## Usage and Installation
 
