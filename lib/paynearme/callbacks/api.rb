@@ -99,13 +99,13 @@ module Paynearme
         if params[:status] and params[:status].downcase == 'decline'
           logger.warn "Transaction #{params[:site_order_identifier]} was declined - do not post, still respond to callback."
         end
+        
+        # You must lookup the pnm_payment_identifier in your business system and prevent double posting.
+        # In the event of a duplicate callback from PayNearMe ( this can sometimes happen in a race or
+        # retry condition) you must respond to all duplicates, but do not post the payment.
+        # No stub code is provided for this check, and is left to the responsibility of the implementor.
+        # Now that you have responded to a /confirm, you need to keep a record of this pnm_payment_identifier.
 
-        # You must lookup the pnm_order_identifier in your business system and
-        # prevent double posting. In the event of a duplicate, ignore the
-        # posting (do not reply) if you have already responded at least once
-        # for the pnm_order_identifier in question.
-        # No stub code is provided for this check, and is left to the
-        # responsibility of the implementor.
         pnm_order_identifier = params[:pnm_order_identifier]
 
 
