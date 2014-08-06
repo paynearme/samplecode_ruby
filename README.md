@@ -15,12 +15,12 @@ and leaves implementation details up to the end user (you).
 
 Add this line to your Rails app's `Gemfile`:
 
-	gem 'paynearme_callbacks'
+	gem 'paynearme_callbacks', :git => 'git@github.com:paynearme/samplecode_ruby.git'
 
 And then execute:
 
 	$ bundle
-	$ rails g paynearme:install_callbacks
+	$ rails g pnm_callbacks:install
 
 This will install the following files:
 
@@ -46,14 +46,15 @@ Modify `app/api/paynearme.rb` for proper integration into your systems.
 
 Add this line to your application's Gemfile:
 
-    gem 'paynearme_callbacks'
+    gem 'paynearme_callbacks', :git => 'git@github.com:paynearme/samplecode_ruby.git'
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
+Or install it yourself by cloning this repo and:
 
-    $ gem install paynearme_callbacks
+    $ rake build
+    $ gem install ./pkg/paynearme_callbacks-1.0.0.gem
 
 
