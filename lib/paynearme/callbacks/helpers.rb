@@ -59,6 +59,20 @@ module Paynearme
       end
 
       def valid_signature?
+        ## InvalidSignatureException
+        #
+        #  This is a security exception and may highlight a configuration problem (wrong secret or siteIdentifier)
+        #  OR it may highlight a possible payment injection from a source other than PayNearMe.  You may choose to
+        #  notify your IT department when this error class is raised.  PayNearMe strongly recommends that your callback
+        #  listeners be whitelisted to ONLY allow traffic from PayNearMe IP addresses.
+        #
+        #  When this class of error is raised in a production environment you may choose to not respond to PayNearMe,
+        #  which will trigger a timeout exception, leading to PayNearMe to retry the callbacks up to 40 times.  If the
+        #  error persists, callbacks will be suspended.
+        #
+        #  In development environment this default message will aid with debugging.
+        ##
+
         sig = signature secret_key, params
         provided = params[:signature]
         logger.debug "Signature - provided: #{provided}, expected: #{sig}, secret: '#{secret_key}'"
