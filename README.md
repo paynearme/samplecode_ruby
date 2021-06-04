@@ -42,6 +42,12 @@ Modify `app/api/paynearme.rb` for proper integration into your systems.
   * Rails 3.2.x (we recommend >= 3.2.15)
   * Rails 4.0.x (we recommend >= 4.0.2)
 
+For Rails 6 and above you will need to add the following to config/initializers/inflections.rb:
+
+    ActiveSupport::Inflector.inflections(:en) do |inflect|
+      inflect.acronym 'API'
+    end
+
 ### Rack or standalone Installation
 
 Add this line to your application's Gemfile:
