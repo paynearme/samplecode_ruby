@@ -5,18 +5,17 @@ require 'grape'
 module Paynearme
   module Callbacks
     module Helpers
-      #extend Grape::API::Helper
+      extend Grape::API::Helpers
 
-      ## This will work with Grape ~> 0.7.0
-      #params :callback_params do
-      #  requires :pnm_order_identifier, type: String
-      #  requires :signature, type: String
-      #  requires :version, type: String
-      #  requires :timestamp, type: Integer
-      #
-      #  optional :site_order_identifier, type: String
-      #  optional :test, type: Boolean
-      #end
+      params :callback_params do
+        requires :pnm_order_identifier, type: String
+        requires :signature, type: String
+        requires :version, type: String
+        requires :timestamp, type: Integer
+      
+        optional :site_order_identifier, type: String
+        optional :test, type: Boolean
+      end
 
       def logger
         API.logger
@@ -42,7 +41,7 @@ module Paynearme
         if defined? Rails
           Rails.application.config.paynearme_callback_version
         else
-          '2.0'
+          '3.0'
         end
       end
 
@@ -50,12 +49,12 @@ module Paynearme
         callback_version == params[:version]
       end
 
-      def signature (secret, params)
+      def signature(secret, params)
         rejections = %w(signature action call controller fp print_buttons route_info)
         keys = params.keys.sort.reject { |key| rejections.include? key }
         sig = keys.inject('') { |memo, cur| "#{memo}#{cur}#{params[cur]}" }
-        logger.debug "Signature string: #{sig + secret}"
-        Digest::MD5.hexdigest(sig + secret)
+        logger.debug "Signature string: #{sig}"
+        callback_version == '3.0' ? OpenSSL::HMAC.hexdigest('sha256', secret, sig).downcase : Digest::MD5.hexdigest(sig + secret)
       end
 
       def valid_signature?
@@ -73,9 +72,9 @@ module Paynearme
         #  In development environment this default message will aid with debugging.
         ##
 
-        sig = signature secret_key, params
+        sig = signature(secret_key, params)
         provided = params[:signature]
-        logger.debug "Signature - provided: #{provided}, expected: #{sig}, secret: '#{secret_key}'"
+        logger.debug "Signature - provided: #{provided}, expected: #{sig}"
         valid = sig == provided
 
         logger.send(valid ? 'info' : 'error', "Signature is #{valid ? 'VALID' : 'INVALID'}")
@@ -119,7 +118,6 @@ module Paynearme
             :version => version
         }
       end
-
     end
   end
 end

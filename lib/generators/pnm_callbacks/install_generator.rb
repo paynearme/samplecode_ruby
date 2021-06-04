@@ -23,7 +23,7 @@ Rails.application.config.paynearme_callback_version = '2.0'
       end
 
       def create_pnm_callbacks
-        copy_file "paynearme/callbacks/api.rb", "app/api/paynearme.rb"
+        copy_file "api_scaffold.rb", "app/api/paynearme/callbacks/api.rb"
       end
 
       def create_routes

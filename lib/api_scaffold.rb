@@ -28,18 +28,11 @@ module Paynearme
         logger.warn "Request took longer than 6 seconds!" if exec_time >= 6000
       end
 
-      ##########
-      # /authorize callback
-      #########################################################################
+      desc 'authorize callback'
       params do
-        # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
-        optional :pnm_order_identifier, type: String
-        requires :signature, type: String
-        requires :version, type: String
-        requires :timestamp, type: Integer
-        optional :site_order_identifier, type: String
+        use :callback_params
+
         optional :site_order_annotation, type: String
-        optional :test, type: Boolean
         optional :status, type: String
       end
       get :authorize do
@@ -51,14 +44,13 @@ module Paynearme
         # request, validate it within your system, and then return a
         # response. Here we just accept payments with order identifiers
         # starting with "TEST"
-        accept = false
-        if valid_signature? and site_order_identifier =~ /^TEST/
-          accept = true
-        end
+        accept = valid_signature? && site_order_identifier =~ /^TEST/
+
         logger.info "Order: #{site_order_identifier} will be #{accept ? 'accepted' : 'declined'}"
 
         special = handle_special_condition! # if special is non-nil, we want to return our special response.
-        if special.nil?
+
+        if !special
           Nokogiri::XML::Builder.new do |xml|
             t = xml[:t] # get our t: namespace prefix
             t.payment_authorization_response(xml_headers) do
@@ -79,18 +71,11 @@ module Paynearme
         end
       end
 
-      ##########
-      # /confirm callback
-      #########################################################################
+      desc 'confirmation callback'
       params do
-        # Common params (future versions will pull this to a helper - requires grape 0.7 to be released)
-        requires :pnm_order_identifier, type: String
-        requires :signature, type: String
-        requires :version, type: String
-        requires :timestamp, type: Integer
-        optional :site_order_identifier, type: String
+        use :callback_params
+
         optional :site_order_annotation, type: String
-        optional :test, type: Boolean
         optional :status, type: String
       end
       get :confirm do
@@ -108,9 +93,9 @@ module Paynearme
 
         pnm_order_identifier = params[:pnm_order_identifier]
 
-
         special = handle_special_condition! # if special is non-nil, we want to return our special response.
-        if special.nil?
+
+        if !special
           Nokogiri::XML::Builder.new do |xml|
             t = xml[:t] # get our t: namespace prefix
             t.payment_confirmation_response(xml_headers) do
@@ -126,7 +111,6 @@ module Paynearme
         # Now that you have responded to a /confirm, you need to keep a record
         # of this pnm_order_identifier and DO NOT respond to any other
         # /confirm requests for that pnm_order_identifier.
-
       end
 
       # helper to build our logger
@@ -141,6 +125,3 @@ module Paynearme
     end
   end
 end
-
-
-
